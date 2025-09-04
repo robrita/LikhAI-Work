@@ -118,43 +118,7 @@ async function sendModeToChainlit(mode) {
     { source: "custom-js", type: "set-mode", value: mode },
     "*"
   );
-  
-  // // Method 3: Try direct command as backup (after a delay)
-  // setTimeout(() => {
-  //   const pendingMode = localStorage.getItem('pendingMode');
-  //   if (pendingMode === mode) {
-  //     console.log(`Mode still pending after 2 seconds, trying command fallback: ${mode}`);
-  //     // Try to find the chat input and send command
-  //     const textareas = document.querySelectorAll('textarea[placeholder*="Type"]');
-  //     const submitButtons = document.querySelectorAll('button[type="submit"]');
-      
-  //     if (textareas.length > 0 && submitButtons.length > 0) {
-  //       const textarea = textareas[textareas.length - 1];
-  //       const submitBtn = submitButtons[submitButtons.length - 1];
-        
-  //       // Store original value
-  //       const originalValue = textarea.value;
-        
-  //       // Set command and submit
-  //       textarea.value = `/set_mode ${mode}`;
-  //       textarea.dispatchEvent(new Event('input', { bubbles: true }));
-        
-  //       setTimeout(() => {
-  //         submitBtn.click();
-  //         console.log(`Fallback command sent: /set_mode ${mode}`);
-          
-  //         // Restore original value
-  //         setTimeout(() => {
-  //           if (textarea.value === `/set_mode ${mode}`) {
-  //             textarea.value = originalValue;
-  //             textarea.dispatchEvent(new Event('input', { bubbles: true }));
-  //           }
-  //         }, 500);
-  //       }, 100);
-  //     }
-  //   }
-  // }, 2000);
-  
+
   console.log(`Mode ${mode} communication initiated`);
 }
 
