@@ -9,7 +9,7 @@ from pathlib import Path
 from loguru import logger
 from azure.ai.agents import AgentsClient
 from azure.identity import DefaultAzureCredential
-from utils.utils import get_llm_models
+from utils.utils import get_llm_models, get_llm_workweb
 from azure.ai.agents.models import (
     CodeInterpreterTool,
     MessageAttachment,
@@ -48,6 +48,18 @@ async def chat_agent(user_input: str) -> str:
         chat_profile = cl.user_session.get("chat_profile")
         model_name = chat_settings.get("model_name")        # Get the model details from the selected model
         llm_details = next((item for item in get_llm_models() if item["model_deployment"] == chat_profile), {})
+        
+        # Get the model_id from llm_workweb by mapping model_deployment and mode
+        mode = cl.user_session.get("mode")
+        model_id = None
+        if llm_details and mode:
+            llm_workweb = get_llm_workweb()
+            workweb_model = next((item for item in llm_workweb 
+                                if item["model_deployment"] == llm_details["model_deployment"] 
+                                and item["mode"] == mode), {})
+            model_id = workweb_model.get("model_id")
+
+        logger.info(f"Mapped model_id: {model_id} for deployment: {llm_details['model_deployment']} and mode: {mode}")
         
         # Show thinking message to user
         msg = await cl.Message(f"[{model_name}] thinking...", author="agent").send()
@@ -106,7 +118,7 @@ async def chat_agent(user_input: str) -> str:
         )
 
         is_thinking = True        # Run the agent to process tne message in the thread
-        with agents_client.runs.stream(thread_id=thread_id, agent_id=llm_details["model_id"]) as stream:
+        with agents_client.runs.stream(thread_id=thread_id, agent_id=model_id) as stream:
             msg.content = ""
             for event_type, event_data, _ in stream:
                 if isinstance(event_data, MessageDeltaChunk):

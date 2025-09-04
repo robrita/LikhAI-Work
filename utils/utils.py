@@ -153,6 +153,40 @@ def get_llm_models() -> list:
             return llm_config
 
 
+# Get llm workweb models from llm_workweb.json or LLM_WORKWEB environment variable
+def get_llm_workweb() -> list:
+    """
+    Retrieve the list of available LLM workweb models from the configuration.
+    
+    Loads model configurations either from environment variable (production)
+    or from the configuration file (development).
+    
+    Returns:
+        list: List of LLM workweb model configuration dictionaries
+    """
+    parse_env = True
+
+    if parse_env:
+        try:
+            llm_workweb_env = os.getenv("LLM_WORKWEB")
+            if llm_workweb_env and llm_workweb_env.strip():
+                return json.loads(llm_workweb_env)
+            else:
+                # Fall back to file if env var is empty
+                parse_env = False
+        except (json.JSONDecodeError, Exception):
+            # Fall back to file if parsing fails
+            parse_env = False
+    
+    if not parse_env:
+        with open("llm_config/llm_workweb.json", "r") as file:
+            llm_workweb = json.load(file)
+
+            # Copy this to the env file
+            # logger.debug(json.dumps(llm_workweb).replace(" ", ""))
+            return llm_workweb
+
+
 # Append openai chat completion message
 def append_message(role: str, content: str, elements: list = []) -> list:
     """
