@@ -16,6 +16,24 @@ from utils.foundry import chat_agent
 logger = get_logger()
 
 
+@cl.action_callback("set_mode")
+async def set_mode(action: cl.Action):
+    """
+    Handle mode setting from work/web toggle switch.
+    
+    Args:
+        action: The action object containing the mode payload
+    """
+    # Sanitize input
+    value = str(action.payload.get("mode", "work")).lower()
+    if value not in {"work", "web"}:
+        value = "null1"
+
+    # Persist to the per-session store
+    cl.user_session.set("mode", value)
+    logger.info(f"Mode set to: {value}")
+
+
 @cl.header_auth_callback
 def header_auth_callback(headers: Dict) -> Optional[cl.User]:
     """
@@ -131,6 +149,14 @@ async def start():
         cl.user_session.set("chat_settings", await init_settings())
         llm_details = get_llm_details()
 
+        # Try to render the bridge element
+        try:
+            bridge = cl.CustomElement(name="SettingsBridge", props={}, display="inline")
+            msg = cl.Message(content="How can I help you today?", author="agent", elements=[bridge])
+            await msg.send()
+        except Exception as e:
+            raise RuntimeError(f"Error on chat start: {str(e)}")
+
         # Create an instance of the AgentsClient using DefaultAzureCredential
         if cl.user_session.get("chat_settings").get("model_provider") == "foundry" and not cl.user_session.get("thread_id"):
             agents_client = AgentsClient(
@@ -163,6 +189,10 @@ async def main(message: cl.Message):
     try:
         cl.user_session.set("start_time", time.time())
         user_input = message.content
+        
+        # Get the current mode from the work/web toggle
+        current_mode = cl.user_session.get("mode", "null2")
+        logger.info(f"on_message mode: {current_mode}")
 
         # Get messages from session
         messages = append_message("user", user_input, message.elements)
