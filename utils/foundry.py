@@ -61,6 +61,10 @@ async def chat_agent(user_input: str) -> str:
 
         logger.info(f"Mapped model_id: {model_id} for deployment: {llm_details['model_deployment']} and mode: {mode}")
         
+        # Check if model_id is None and raise error
+        if model_id is None:
+            raise RuntimeError("Please refresh this page.")
+        
         # Show thinking message to user
         msg = await cl.Message(f"[{model_name}] thinking...", author="agent").send()
         if not msg:

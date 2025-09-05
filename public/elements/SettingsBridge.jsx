@@ -37,12 +37,16 @@ export default function SettingsBridge() {
     // Check for pending mode in localStorage on component mount
     const checkPendingMode = () => {
       const pendingMode = localStorage.getItem('pendingMode');
-      if (pendingMode && (pendingMode === 'work' || pendingMode === 'web')) {
+      const localMode = localStorage.getItem('workWebMode');
+      console.log('Checking pending mode in SettingsBridge:', pendingMode);
+      console.log('Checking local mode in SettingsBridge:', localMode);
+
+      if ((pendingMode && (pendingMode === 'work' || pendingMode === 'web')) || (localMode && (localMode === 'work' || localMode === 'web'))) {
         // Re-trigger the mode setting
         window.postMessage({
           source: "mode-checker",
           type: "set-mode",
-          value: pendingMode
+          value: pendingMode || localMode
         }, "*");
         console.log('Re-triggering pending mode from SettingsBridge:', pendingMode);
       }
