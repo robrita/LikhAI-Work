@@ -76,6 +76,7 @@ function createWorkWebToggle() {
     console.log(`Toggle initialized with local mode: ${currentMode}`);
   } else {
     currentMode = 'work';
+    localStorage.setItem('workWebMode', currentMode);
     console.log('Toggle initialized with default mode: work');
   }
   
@@ -159,6 +160,7 @@ function initializeToggleState() {
     console.log(`Using local storage mode: ${storedMode}`);
   } else {
     storedMode = 'work';
+    localStorage.setItem('workWebMode', storedMode);
     console.log('Using default mode: work');
   }
   
