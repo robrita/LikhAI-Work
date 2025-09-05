@@ -65,10 +65,25 @@ async def chat_agent(user_input: str) -> str:
         if model_id is None:
             raise RuntimeError("Please refresh this page.")
         
+        is_first_message = not cl.user_session.get("first_message")
+        if is_first_message:
+            cl.user_session.set("first_message", user_input)
+
         # Show thinking message to user
         msg = await cl.Message(f"[{model_name}] thinking...", author="agent").send()
         if not msg:
             raise Exception("Failed to create message object")
+        
+        # Attach ThreadNameUpdater element if this is the first message
+        if is_first_message:
+            # Create a custom element that will trigger the thread name update
+            thread_name_updater = cl.CustomElement(
+                name="ThreadNameUpdater", 
+                props={"userInput": user_input}, 
+                display="inline"
+            )
+            msg.elements = [thread_name_updater]
+            await msg.update()
 
         # Create an instance of the AgentsClient using DefaultAzureCredential
         agents_client = AgentsClient(
