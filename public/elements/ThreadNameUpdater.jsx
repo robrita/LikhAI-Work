@@ -3,7 +3,10 @@
 
 import { useEffect } from 'react';
 
-export default function ThreadNameUpdater({ userInput }) {
+export default function ThreadNameUpdater() {
+  // Access userInput from global props object (Chainlit pattern)
+  const userInput = props?.userInput;
+  
   useEffect(() => {
     const updateThreadName = async () => {
       try {
@@ -12,13 +15,11 @@ export default function ThreadNameUpdater({ userInput }) {
         const threadIdMatch = currentUrl.match(/\/thread\/([a-f0-9-]+)/);
         
         if (!threadIdMatch) {
-          console.warn('Thread ID not found in URL:', currentUrl);
+          console.warn('[ThreadNameUpdater] Thread ID not found in URL:', currentUrl);
           return;
         }
         
         const threadId = threadIdMatch[1];
-        console.log('Extracted thread ID:', threadId);
-        console.log('User input for thread name:', userInput);
         
         // Truncate userInput to a reasonable length for thread name (max 100 chars)
         const threadName = userInput.length > 100 
@@ -37,20 +38,17 @@ export default function ThreadNameUpdater({ userInput }) {
           })
         });
         
-        if (response.ok) {
-          console.log('Thread name updated successfully to:', threadName);
-        } else {
-          const errorText = await response.text();
-          console.warn('Failed to update thread name:', response.status, response.statusText, errorText);
-        }
+        const results = await response.json();
+        console.log('[ThreadNameUpdater] results:', results);
         
       } catch (error) {
-        console.error('Error updating thread name:', error);
+        console.error('[ThreadNameUpdater] Error updating thread name:', error);
       }
     };
     
     // Only update if userInput is provided and is not empty
     if (userInput && userInput.trim()) {
+      console.log('[ThreadNameUpdater] Updating thread name to:', userInput);
       // Add a small delay to ensure the page is fully loaded
       setTimeout(updateThreadName, 500);
     }

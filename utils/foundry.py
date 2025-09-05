@@ -59,7 +59,7 @@ async def chat_agent(user_input: str) -> str:
                                 and item["mode"] == mode), {})
             model_id = workweb_model.get("model_id")
 
-        logger.info(f"Mapped model_id: {model_id} for deployment: {llm_details['model_deployment']} and mode: {mode}")
+        logger.debug(f"Mapped model_id: {model_id} for deployment: {llm_details['model_deployment']} and mode: {mode}")
         
         # Check if model_id is None and raise error
         if model_id is None:
@@ -139,6 +139,8 @@ async def chat_agent(user_input: str) -> str:
         is_thinking = True        # Run the agent to process tne message in the thread
         with agents_client.runs.stream(thread_id=thread_id, agent_id=model_id) as stream:
             msg.content = ""
+            # Delete msg.elements
+            msg.elements = []
             for event_type, event_data, _ in stream:
                 if isinstance(event_data, MessageDeltaChunk):
                     msg.content += event_data.text
